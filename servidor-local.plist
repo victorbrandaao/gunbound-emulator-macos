@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>local.gunbound.season2.testes</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/Users/nomedaconta/Documents/ChatGPT/Manutenção do mac/gunbound-season2-testes/.venv/bin/python</string>
+		<string>/Users/nomedaconta/Documents/ChatGPT/Manutenção do mac/gunbound-season2-testes/servidor-local.py</string>
+	</array>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>StandardErrorPath</key>
+	<string>/Users/nomedaconta/Documents/ChatGPT/Manutenção do mac/gunbound-season2-testes/logs/supervisor.log</string>
+	<key>StandardOutPath</key>
+	<string>/Users/nomedaconta/Documents/ChatGPT/Manutenção do mac/gunbound-season2-testes/logs/supervisor.log</string>
+	<key>WorkingDirectory</key>
+	<string>/Users/nomedaconta/Documents/ChatGPT/Manutenção do mac/gunbound-season2-testes</string>
+</dict>
+</plist>

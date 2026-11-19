@@ -1,0 +1,12 @@
+aiosqlite==0.22.1
+asyncmy==0.2.16
+asyncpg==0.32.0
+cffi==2.1.1
+cryptography==50.0.2
+dependency-injector==4.48.2
+greenlet==3.5.6
+pycparser==3.11
+pycryptodome==3.23.0
+PyYAML==6.0.3
+SQLAlchemy==2.0.43
+typing_extensions==4.16.0

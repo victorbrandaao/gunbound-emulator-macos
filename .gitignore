@@ -1,0 +1,70 @@
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+
+# Ambientes virtuais
+venv/
+env/
+Scripts/
+Include/
+lib/
+.env/
+
+# Dependências
+site-packages/
+
+# Configurações do sistema/IDE
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Arquivos temporários
+*.log
+*.tmp
+*.bak
+
+# Banco de dados e arquivos binários
+*.db
+*.sqlite3
+data.bin
+
+# Outros
+dist/
+build/
+node_modules/
+.venv/
+gbwc.db
+smoke.db
+logs/
+
+# Testes e caches
+.pytest_cache/
+
+# Configuração local (o modelo é config.example.yml)
+config.yml
+
+# Debug local (útil para análise, não vai para o repositório)
+dec.py
+db/gbwc 2.sql
+db/users.sql
+
+# Saída do anticheat mode capture (pares pergunta/resposta do GameGuard)
+gg-capture*.jsonl
+
+# Captura do túnel 0x4500 (tunnel_log)
+tunnel-capture*.jsonl
+
+# Mapas dos clientes (tools/import_maps.py)
+maps/
+
+conta-admin-local.json
+backups/
+runtime/
+cliente-v584/
+
+compartilhar/
+instaladores/
+config.online.yml
+servidor-rede.json

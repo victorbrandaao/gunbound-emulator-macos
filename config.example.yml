@@ -1,0 +1,188 @@
+# Exemplo: copie para config.yml (que fica fora do Git) e ajuste caminhos, IPs e portas.
+crypto:
+  broker_key: "A92753041BFCACE65B2338346846038C"
+  game_key:   "FFB3B3BEAE97AD83B9610E23A43C2EB0"
+
+global:
+  super_user_item: 204801 # ID do item Power User
+  product_version: &product_version 8452169
+
+anticheat: # global, vale para todos os game servers (um `anticheat:` dentro do game server sobrepõe); docs/gameguard-protocol.md
+  provider: none  # none | gameguard (v495, v548, v584) | hackshield (TH v404, v440)
+  mode: "off"     # off | observe | capture | required
+  # validator: ggauth
+  requery: 200    # s até a próxima pergunta depois de uma resposta boa
+  deadline: 600   # s para responder antes de derrubar (só required)
+  ggauth:         # usado com validator: ggauth (docs/ggauth50-binding.md)
+    python_x86: C:\caminho\para\python-x86\python.exe
+    dll: vendor/gameguard/ggauth50.dll
+    original_server: C:\caminho\para\GunBoundServ3.exe
+    minimum_version: 2009010101
+    timeout: 5
+
+database:
+  # Exemplos:
+  #   SQLite:     "sqlite+aiosqlite:///gbwc.db"
+  #   MySQL:      "mysql+asyncmy://gbuser:gbpass@127.0.0.1:3306/gbwc"
+  #   PostgreSQL: "postgresql+asyncpg://gbuser:gbpass@127.0.0.1:5432/gbwc"
+  uri: "sqlite+aiosqlite:///gbwc.db"
+
+features: # FuncRestrict do original; os bits 0..12 e 24..31 não são lidos por nenhum cliente nem pelo servidor (docs/Eventos.md)
+  AVATAR_ENABLED: &AVATAR_ENABLED 16 # 1 << 4
+  EFFECT_FORCE: &EFFECT_FORCE 8192 # 1 << 13
+  EFFECT_TORNADO: &EFFECT_TORNADO 16384 # 1 << 14
+  EFFECT_LIGHTNING: &EFFECT_LIGHTNING 32768 # 1 << 15
+  EFFECT_WIND: &EFFECT_WIND 65536 # 1 << 16
+  EFFECT_THOR: &EFFECT_THOR 131072 # 1 << 17
+  EFFECT_MOON: &EFFECT_MOON 262144 # 1 << 18
+  EFFECT_ECLIPSE: &EFFECT_ECLIPSE 524288 # 1 << 19
+  EVENT1_ENABLE: &EVENT1_ENABLE 1048576 # 1 << 20
+  EVENT2_ENABLE: &EVENT2_ENABLE 2097152 # 1 << 21
+  EVENT3_ENABLE: &EVENT3_ENABLE 4194304 # 1 << 22
+  EVENT4_ENABLE: &EVENT4_ENABLE 8388608 # 1 << 23
+
+broker:
+  host: "127.0.0.1"
+  port: 8372
+  # th_port: 8373 # opcional: porta só do TH (ele lê a lista 0x1102 com 13 bytes no fim; aponte Port= do GunBound.ini do TH para ela)
+  product_version: *product_version
+
+buddy_server:
+  host: "127.0.0.1"
+  port: 8352 # TCP e UDP; o cliente acha pelo BuddyIP/BuddyPort do GunBound.ini (sem BuddyIP ele não conecta)
+  # notice: [["Título", "Texto"]] # opcional: aviso 0x1FFE mandado depois do login no buddy (até 10)
+
+gameservers:
+  - name: "Gunbound WC" # Max, 32 bytes
+    description: "Área livre\\nSem avatar" # Max, 64 bytes
+    announcement: "# Bem vindo ao GunBound WC EmuServer"
+    host: "127.0.0.1"
+    port: 8360
+    accept: # IPs ou range de IPs de quem pode entrar no servidor, usando notação CIDR
+      - 127.0.0.1
+      - 64.0/1
+    version_min: 1
+    version_max: 999
+    product_version: *product_version
+    phase: "WCS2" # fase do cliente: TH, WCS1 (v440, v495), WCS2 (v548, v584) - opcodes e layouts (gunbound/game/phase.py)
+    users_max: 3000 # max 65535
+    event: 0 # 1 = wowlg (imagem de fundo na lista); 2 = Grand Prix (o broker já usa 2 se grandprix.enabled)
+    grade_min: 1 # patentes na numeração da versão: TH/WCS1 19 (pintinho) .. -4 (dragão); WCS2 1 (pintinho) .. 41 (coroa)
+    grade_max: 41
+    gold_factor: 230          # GoldFactor do servidor original (GunBoundServ/setting.txt)
+    score_factor: 270         # ScoreFactor do servidor original
+    stage_event: 0            # StageEvent do original: byte alto (bits 24-31) do settings de toda sala criada
+    idle_room: &IDLE_ROOM     # sala ociosa (Idle*/RoomClose* do Setting; padrões do original; o Setting.txt do pacote "Season 2 server" usa close 2220, warn 2280)
+      close: 1200             # segundos desde a criação/fim de partida: todos saem com 0x3FFF + close_msg
+      warn: 1140              # a partir daqui manda warn_msg (0x5101) a cada checagem; vazio = sem aviso
+      close_msg: ""
+      warn_msg: ""
+    quick_start: &QUICK_START # QuickStart (0x2130) do original: QuickStartRoom com settings = option e máx = man (1..8)
+      man: 6
+      option: 0x451C2
+    jackpot: &JACKPOT # WCS2, Jack Pot Booster Card por carta (0 Normal, 1 Rare, 2 Epic, 3 Legend): gold [mín, máx], itens por carta,
+             # fail = % de cada item vir "Boost Failed", pool = [item, quantidade] sorteado por igual
+             # joias do encantamento (ex3.dat do v584, preço 0 = só vinham do Jackpot): 700038 Spirit, 700039 Nihility,
+             # 700040 Nirvana, 700041 Fortune Stone (sucesso certo), 700042 Shield Stone (não destrói)
+      0: {gold: [100, 1000], items: 1, fail: 50, pool: [[98416, 1], [98355, 1], [700038, 1], [700039, 1], [700040, 1]]}
+      1: {gold: [500, 3000], items: 1, fail: 40, pool: [[98305, 1], [98343, 1], [700038, 2], [700039, 2], [700040, 2], [700042, 1]]}
+      2: {gold: [1000, 5000], items: 2, fail: 30, pool: [[98345, 1], [98423, 1], [700038, 3], [700039, 3], [700040, 3], [700041, 1], [700042, 1]]}
+      3: {gold: [3000, 10000], items: 2, fail: 10, pool: [[98416, 1], [98423, 1], [700038, 5], [700039, 5], [700040, 5], [700041, 2], [700042, 2]]}
+    tutorial: &TUTORIAL # WCS2, prêmio na 1ª conclusão de cada lição (0x7014); o cliente só mostra o texto (Language.txt
+              # 2000552..2000576) e o ícone. items = [código, qtd] no baú (ex3.dat: 700003 Defense, 700004 Damage up,
+              # 700010 Team Offence up, 700007 Treasure Key, 700002 Special Force, 700006 Lock down);
+              # avatar = head/body/flag, chega como presente sorteado entre os avatar_pool menus mais baratos em gold
+      sender: GunBound
+      avatar_pool: 10
+      1: {gold: 100, items: [[700003, 30]]}
+      2: {gold: 150, items: [[700004, 30]]}
+      3: {gold: 250, items: [[700010, 30]]}
+      4: {gold: 350, items: [[700007, 30]]}
+      5: {gold: 500, items: [[700002, 30]]}
+      6: {gold: 600, items: [[700006, 30]]}
+      7: {gold: 800, avatar: head}
+      8: {gold: 1000, avatar: body}
+      9: {gold: 1500, avatar: flag}
+    stats_interval: 300 # Intervalo em segundos que será inserido a quantidade de usuários na tabela UserCount
+    # local_udp_fix: true # teste com dois clientes no mesmo PC: anuncia a porta UDP real de cada um (docs/Protocolo-Salas.md 6.6)
+    # tunnel_log: tunnel-capture.jsonl # grava cada 0x4500 (hex) da sala/partida para mapear o P2P (docs/Bots.md); desligue depois
+    bots: &BOTS # bots de sala (docs/Bots.md): /bot add [patente] [mobile], /bot remove [nome|all] (mestre da sala)
+      enabled: false
+      gm_mobile: true  # GM escolhe o mobile no /bot add
+      max: 7           # bots por sala
+      reward: 0.5      # fator do gold/GP de quem joga com bot (0 = nada, 0.5 = metade)
+      # graphics_xfs: ../clientes/WC-S1-v495/graphics.xfs  # mapas (.lnd) para a mira; padrão este, relativo ao server
+      # maps: maps  # mapas importados por tools/import_maps.py (S1 e v584); sem eles, o graphics_xfs acima
+      # skill: {floor: 0.25, ceil: 0.95, k: 3, damping: 0.5} # curva de acerto e penalidades (gunbound/bot/skill.py)
+    features:
+      - *AVATAR_ENABLED
+      - *EFFECT_FORCE
+      - *EFFECT_TORNADO
+      - *EFFECT_LIGHTNING
+      - *EFFECT_WIND
+      - *EFFECT_THOR
+      - *EFFECT_MOON
+      - *EFFECT_ECLIPSE
+
+  - name: "Gunbound WC Grand Prix" # Servidor com Grand Prix: rode com servidor-game-grandprix.bat (game.py 1)
+    description: "Grand Prix\\nGrupo contra grupo"
+    announcement: "# Grand Prix: entre na fila pelo canal"
+    host: "127.0.0.1"
+    port: 8361
+    accept:
+      - 127.0.0.1
+      - 64.0/1
+    version_min: 1
+    version_max: 999
+    product_version: *product_version
+    phase: "WCS2" # fase do cliente: TH, WCS1 (v440, v495), WCS2 (v548, v584) - opcodes e layouts (gunbound/game/phase.py)
+    users_max: 3000
+    event: 0
+    grade_min: 1
+    grade_max: 41
+    gold_factor: 230
+    score_factor: 270
+    stage_event: 0
+    idle_room: *IDLE_ROOM
+    quick_start: *QUICK_START
+    jackpot: *JACKPOT
+    tutorial: *TUTORIAL
+    bonus_event: 0 # WCS2: % de chance por partida de sortear o bônus "+Gold/+GP" (0x4300, tipos 0..9); 0 = desligado
+    # result_rewards: {kill: [50, 1], win: [100, 2]} # WCS2: gold e GP por evento no fim da partida (0x4412 do v584 só manda contagens); padrões em gunbound/game/protocol/wcs2/result.py
+    # stage_channel: true # WCS2: canal Stage (missões do v584: 0x1111 tipo 2, salas de 1/2); use event: 4 para o ícone
+    # country_board: false # WCS2: não manda o quadro por país (0x7031) junto do ranking 0x7011 da lista de canais
+    # mvp: false # WCS2: sem MVP na tela de resultado (0x4415); padrão = quem fez mais gold base
+    # game_points: {RenaPoints: 10, DiscountPoints: 5} # WCS2: pontos de Rena/desconto por partida (sem fonte no jogo); {} = nenhum
+    # slot_machine: [[4, 0, 58], [0, 20, 25], [1, 500, 12], [1, 3000, 3], [2, 700014, 2]] # WCS2 caça-níquel: [resultado (0 fichas, 1 gold, 2/3 item, 4 perdeu), valor x aposta (item: código, 1 unidade), peso]
+    # jewel_enchant: [[1, 700038, 1, N, 1, 0, 0, 0, 0, 0, 0]] # WCS2 0x6117: receitas na ordem do JewelEnchantList.dat do cliente (índice = linha); padrão em wcs2/enchant.py
+    # jackpot_bomb: {1: [700096, 1], 2: [700097, 1]} # WCS2: prêmio da bomba por carta (Rare 12 / Epic 15 cartas); padrão = carta seguinte
+    # rena: [[700096, 1, 10], [700097, 1, 1]] # WCS2 Rena (0x7124, custa 100 Game.RenaPoints): [item, quantidade, peso]; sem chave = megafone e joias (shop.DEFAULT_RENA)
+    stats_interval: 300
+    # local_udp_fix: true # teste com dois clientes no mesmo PC: anuncia a porta UDP real de cada um (docs/Protocolo-Salas.md 6.6)
+    # tunnel_log: tunnel-capture.jsonl # grava cada 0x4500 (hex) da sala/partida para mapear o P2P (docs/Bots.md); desligue depois
+    bots: *BOTS
+    features:
+      - *AVATAR_ENABLED
+      - *EFFECT_FORCE
+      - *EFFECT_TORNADO
+      - *EFFECT_LIGHTNING
+      - *EFFECT_WIND
+      - *EFFECT_THOR
+      - *EFFECT_MOON
+      - *EFFECT_ECLIPSE
+    grandprix:
+      enabled: true
+      battle_player_count: 1      # jogadores por grupo (sala = 2x)
+      mode: SOLO                  # SOLO, SCORE, TAG ou JEWEL
+      stage: 0                    # mapa (0 = aleatório)
+      rankers: 10                 # tamanho do ranking pessoal enviado
+      rank_interval: 30           # segundos entre recálculos do ranking (30 para testar; original 300)
+      personal_win_score: 10
+      personal_lose_score: -5
+      big_rank_difference: 100    # diferença de pontos entre grupos que conta como "grande"
+      group_win_score_small: 10
+      group_lose_score_small: -10
+      group_win_score_big_higher: 5     # favorito venceu
+      group_lose_score_big_lower: -5
+      group_win_score_big_lower: 20     # zebra venceu
+      group_lose_score_big_higher: -20
